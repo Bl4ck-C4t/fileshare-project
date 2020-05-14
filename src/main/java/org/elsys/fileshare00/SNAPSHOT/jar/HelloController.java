@@ -16,9 +16,8 @@ public class HelloController {
     @Autowired
     public FileRepo fileRep;
 
-    @GetMapping("/api/hello")
-
-    public String hello(@RequestParam int id) {
+    @GetMapping("/api/file")
+    public String getFile(@RequestParam int id) {
 
         Optional<FileEntity> opt = fileRep.findById(id);
         if (opt.isPresent()) {
