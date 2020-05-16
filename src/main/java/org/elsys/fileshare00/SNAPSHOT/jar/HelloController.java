@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.security.Principal;
 import java.util.*;
 
@@ -33,6 +34,9 @@ public class HelloController {
 
     @GetMapping("/api/getUser")
     public String getCurrentUserName(Principal principal) {
+        if(principal == null){
+            return null;
+        }
         return principal.getName();
     }
 
@@ -58,6 +62,10 @@ public class HelloController {
         final String link = "http://localhost:8080/activate?code=" + unregistered_user.activationCode;
         String mes = "Click this link to activate your account: " + link;
         emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
+        boolean Wascreated = new File("./UsersFiles/" + unregistered_user.username).mkdir();
+        if(!Wascreated){
+            System.out.println("Couldn't create user dir for " + unregistered_user.username);
+        }
         // usersRepo.save(unregistered_user);
         // authorityRepo.save(auth);
         return "It's good";
@@ -75,12 +83,16 @@ public class HelloController {
     }
 
     @GetMapping("/api/getFiles")
-    public List<String> getFiles(@RequestParam String path){
-        List<String> files = new ArrayList<String>();
-        files.add("file1.txt");
-        // get files and directories at a path
-
-        return files;
+    public List<String> getFiles(@RequestParam String path, Principal user){
+        if (user == null){
+            return null;
+        }
+        return Arrays.asList(
+                Objects.requireNonNull(
+                        new File(
+                                String.format("./UsersFiles/%s/%s", user.getName(), path)
+                        ).list()
+                ));
     }
 
     @GetMapping("/api/getFilesWithLink")
