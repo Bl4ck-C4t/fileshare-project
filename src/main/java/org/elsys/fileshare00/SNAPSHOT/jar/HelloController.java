@@ -84,6 +84,8 @@ public class HelloController {
 
     @GetMapping("/api/getFiles")
     public List<String> getFiles(@RequestParam String path, Principal user){
+        path = path.replace("../", "");
+        path = path.replace("..", "");
         if (user == null){
             return null;
         }

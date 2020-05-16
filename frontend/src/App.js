@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
-import './App.css';
+import './css/App.css';
 import RegistrationForm from './Registration.js';
 import FilePage from './Files.js';
 import ActivationPage from './Activation.js';
@@ -59,12 +59,10 @@ class App extends Component {
         <Route exact path="/">
             <MainPage active_user={this.state.active_user}/>
         </Route>
-        <Route path="/register" component={withRouter(RegistrationForm)}>
+        <Route path="/register" component={withRouter(RegistrationForm)} />
 
-        </Route>
-        <Route path="/files">
-            <FilePage active_user={this.state.active_user} />
-        </Route>
+        <Route path="/files" component={withRouter(FilePage)} />
+
         <Route path="/activate">
             <ActivationPage />
         </Route>

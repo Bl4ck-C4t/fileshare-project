@@ -1,5 +1,5 @@
 import React, {Component, useState, useEffect} from 'react';
-import './Registration.css'
+import './css/Registration.css'
 import {
   Redirect,
   useHistory,
@@ -132,7 +132,7 @@ class RegistrationForm extends Component {
             <input type="password" placeholder="Repeat Password" name="repeat_password" required onChange={this.handleChange}/>
             <hr/>
             <br />
-            <div className="card">{this.state.errorMessages.map((error, i) => {
+            <div className="error-div">{this.state.errorMessages.map((error, i) => {
                   return <p key={i} style={{color: "red"}}>{error}</p>
               })}
             </div>
