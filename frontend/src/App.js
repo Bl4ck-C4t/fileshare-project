@@ -1,34 +1,71 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
+import RegistrationForm from './Registration.js';
+import FilePage from './Files.js';
+import {
+  Switch,
+  Route,
+  Link,
+  withRouter
+} from "react-router-dom";
+
+function MainPage(props){
+    const user = props.active_user;
+    return (
+    user ? (
+    <div className="App">
+                <a href="/login?logout"> Log out </a> <br/>
+                <Link to="/files"> Go to Files </Link>
+
+     </div>
+        )
+
+    : (
+
+        <div className="App">
+            <a href="/login"> Log in </a> <br/>
+            <Link to="/register"> Register </Link>
+        </div>
+        )
+    );
+}
 
 class App extends Component {
-
-    state = {};
-
-    componentDidMount() {
-        setInterval(this.hello, 250);
+    constructor(props) {
+        super(props);
+        this.state = {
+            active_user: null
+        };
     }
 
-    hello = () => {
-        fetch('/api/hello')
-            .then(response => response.text())
-            .then(message => {
-                this.setState({message: message});
-            });
-    };
+    componentDidMount(){
+        fetch("/api/getUser").then((response) => {
+            if (response.redirected){
+                return null
+            }
+            else{
+                return response.text();
+            }
+        })
+        .then(text => this.setState({ active_user: text}));
+    }
+
 
     render() {
         return (
-            <div className="App">
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo"/>
-                    <h1 className="App-title">{this.state.message}</h1>
-                </header>
-                <p className="App-intro">
-                    To get started, edit <code>src/App.js</code> and save to reload.
-                </p>
-            </div>
+        <Switch>
+        <Route exact path="/">
+            <MainPage active_user={this.state.active_user}/>
+        </Route>
+        <Route path="/register" component={withRouter(RegistrationForm)}>
+
+        </Route>
+        <Route path="/files">
+            <FilePage active_user={this.state.active_user} />
+        </Route>
+        </Switch>
+
         );
     }
 }
