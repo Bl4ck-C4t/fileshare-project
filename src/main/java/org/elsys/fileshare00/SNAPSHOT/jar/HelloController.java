@@ -1,11 +1,7 @@
 package org.elsys.fileshare00.SNAPSHOT.jar;
 
-import org.elsys.fileshare00.SNAPSHOT.jar.Users.Authority;
-import org.elsys.fileshare00.SNAPSHOT.jar.Users.AuthorityRepo;
-import org.elsys.fileshare00.SNAPSHOT.jar.Users.User;
-import org.elsys.fileshare00.SNAPSHOT.jar.Users.UsersRepo;
+import org.elsys.fileshare00.SNAPSHOT.jar.Users.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,15 +17,15 @@ public class HelloController {
     @Autowired
     public AuthorityRepo authorityRepo;
 
-    private static String genRandomString(){
+    private static String genRandomString(int targetStringLength){
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
         Random random = new Random();
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-        return random.ints(leftLimit, rightLimit + 1)
+        return random.ints(0, characters.length())
                 .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .collect(StringBuilder::new, (x,y) -> x.append(characters.charAt(y)), StringBuilder::append)
                 .toString();
     }
 
@@ -52,13 +48,22 @@ public class HelloController {
         unregistered_user.username = body.username;
         unregistered_user.password = body.password;
         unregistered_user.enabled = true;
+        unregistered_user.activationCode = genRandomString(10);
         Authority auth = new Authority();
         auth.username = unregistered_user.username;
         auth.authority = "USER";
 
-        usersRepo.save(unregistered_user);
-        authorityRepo.save(auth);
+        // usersRepo.save(unregistered_user);
+        // authorityRepo.save(auth);
+
+
         return "It's good";
+    }
+
+    @GetMapping("/api/sendMessage")
+    public void testSendMessage(){
+        EmailServiceImpl emailService = new EmailServiceImpl();
+        emailService.sendSimpleMessage("stef4oben88@gmail.com", "Testing", "Test completed");
     }
 
 
@@ -88,7 +93,7 @@ public class HelloController {
 
     @GetMapping("/api/generateLink")
     public String generateProtectedLink(@RequestParam("path") String filepath){
-        String randomCode = HelloController.genRandomString();
+        String randomCode = HelloController.genRandomString(20);
         // register code in database
         return "/api/getFiles?access_code="+randomCode;
     }

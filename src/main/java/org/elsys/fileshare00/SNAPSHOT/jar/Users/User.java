@@ -22,4 +22,7 @@ public class User {
 
     @Column
     public boolean enabled;
+
+    @Column(name = "activation_code")
+    public String activationCode;
 }
