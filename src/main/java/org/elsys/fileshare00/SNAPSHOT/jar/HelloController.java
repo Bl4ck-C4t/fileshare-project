@@ -17,6 +17,8 @@ public class HelloController {
     @Autowired
     public AuthorityRepo authorityRepo;
 
+    private EmailServiceImpl emailService = new EmailServiceImpl();
+
     private static String genRandomString(int targetStringLength){
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
@@ -48,24 +50,29 @@ public class HelloController {
         unregistered_user.username = body.username;
         unregistered_user.password = body.password;
         unregistered_user.enabled = true;
-        unregistered_user.activationCode = genRandomString(10);
+        unregistered_user.activationCode = genRandomString(15);
         Authority auth = new Authority();
         auth.username = unregistered_user.username;
         auth.authority = "USER";
 
+        final String link = "http://localhost:8080/activate?code=" + unregistered_user.activationCode;
+        String mes = "Click this link to activate your account: " + link;
+        emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
         // usersRepo.save(unregistered_user);
         // authorityRepo.save(auth);
-
-
         return "It's good";
     }
 
-    @GetMapping("/api/sendMessage")
-    public void testSendMessage(){
-        EmailServiceImpl emailService = new EmailServiceImpl();
-        emailService.sendSimpleMessage("stef4oben88@gmail.com", "Testing", "Test completed");
+    @GetMapping("/api/activate")
+    public boolean activateAccount(@RequestParam("code") String activationCode){
+        User user = usersRepo.findByActivationCode(activationCode);
+        if (user == null){
+            return false;
+        }
+        user.activate();
+        usersRepo.save(user);
+        return true;
     }
-
 
     @GetMapping("/api/getFiles")
     public List<String> getFiles(@RequestParam String path){

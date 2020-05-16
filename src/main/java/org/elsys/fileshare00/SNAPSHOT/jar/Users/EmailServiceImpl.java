@@ -21,11 +21,12 @@ public class EmailServiceImpl {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        mailSender.setHost("smtp.mailgun.org");
         mailSender.setPort(587);
 
-        mailSender.setUsername("stef4oben88@gmail.com");
-        mailSender.setPassword("Thisaccountisl0c|<ed!");
+
+        mailSender.setUsername("postmaster@sandbox75d678ed202045988b75060cbfa0f8b0.mailgun.org");
+        mailSender.setPassword("99a07673ef7b1213ba68f16286beba39-3e51f8d2-ec66474d");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
@@ -42,33 +43,11 @@ public class EmailServiceImpl {
     public void sendSimpleMessage(String to, String subject, String text) {
 
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("fileserver@test.com");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
         emailSender.send(message);
-    }
-
-    public void sendMail(String to, String subject, String text ) {
-
-        String from = "web@gmail.com";
-
-        String host = "localhost";
-        Properties properties = System.getProperties();
-        properties.setProperty("mail.smtp.host", host);
-        Session session = Session.getDefaultInstance(properties);
-
-        try {
-            // Create a default MimeMessage object.
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            message.setSubject(subject);
-            message.setContent(text, "text/html");
-            Transport.send(message);
-            System.out.println("Sent message successfully....");
-        } catch (MessagingException mex) {
-            mex.printStackTrace();
-        }
     }
 
 }

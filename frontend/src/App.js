@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import RegistrationForm from './Registration.js';
 import FilePage from './Files.js';
+import ActivationPage from './Activation.js';
 import {
   Switch,
   Route,
@@ -63,6 +64,9 @@ class App extends Component {
         </Route>
         <Route path="/files">
             <FilePage active_user={this.state.active_user} />
+        </Route>
+        <Route path="/activate">
+            <ActivationPage />
         </Route>
         </Switch>
 

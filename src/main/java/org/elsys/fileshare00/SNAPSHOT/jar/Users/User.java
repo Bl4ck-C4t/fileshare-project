@@ -25,4 +25,8 @@ public class User {
 
     @Column(name = "activation_code")
     public String activationCode;
+
+    public void activate() {
+        enabled = true;
+    }
 }
