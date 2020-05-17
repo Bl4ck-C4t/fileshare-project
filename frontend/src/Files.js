@@ -1,42 +1,71 @@
 import React, {Component} from 'react';
 import './css/Files.css';
+import axios from 'axios';
+import {
+  Redirect,
+  useHistory,
+  Link,
+  useLocation
+} from "react-router-dom";
 
-async function getFiles(path: string){
-    let response = await fetch("/api/getFiles?path=" + path).then(res => res.json());
+async function getFiles(path: string, token: CancelToken){
+    let response = await axios.get("/api/getFiles?path=" + path, {cancelToken: token}).then(res => res.data);
+//    console.log("sd");
+    //console.log(await response);
+
     return response;
+
 }
 
 class FileComponent extends Component {
-    _isMounted = false;
     constructor(props) {
         super(props);
         this.state = {
             active_user: null,
             files: []
         };
+        const CancelToken = axios.CancelToken;
+        this.source = CancelToken.source();
 
     }
 
     componentDidMount(){
-        getFiles("/").
-        then(res => this.setState({files: res}));
-        fetch("/api/getUser").then((response) => {
-                    if (response.redirected){
-                        return null
-                    }
-                    else{
-                        return response.text();
-                    }
-                })
-                .then(text => this.setState({ active_user: text}));
+
+        getFiles("/", this.source.token)
+        .then(res => this.setState({files: res}))
+        .catch(thrown => {
+              if (axios.isCancel(thrown)) {
+                console.log('Request canceled', thrown.message);
+              }
+              else{
+                console.log('Error: ', thrown.message);
+              }
+          });
+
+        axios.get("/api/getUser", {cancelToken: this.source.token})
+        .then((response) =>  response.data)
+        .then(text => this.setState({ active_user: text}))
+        .catch(thrown => {
+              if (axios.isCancel(thrown)) {
+                console.log('Request canceled', thrown.message);
+              }
+               else{
+                  console.log('Error: ', thrown.message);
+                }
+        });;
     }
 
     componentWillUnmount() {
-
+        this.source.cancel('Promises canceled');
     }
 
     accessFile(fname: string){
         console.log(fname);
+
+        this.props.history.push(this.props.location.pathname + "/" + fname)
+        let path = this.props.location.pathname;
+//        path = path.replace("/files", "")
+        console.log(path);
     }
 
     render() {
@@ -54,7 +83,7 @@ class FileComponent extends Component {
 
                          <div className="row no-gutters" onClick={() => this.accessFile(fname)}>
                             <div className="col-md-4">
-                              <img src={require("./images/file.png")} className="card-image" />
+                              <img src={require("./images/file.png")} className="card-image" alt="" />
                             </div>
                             <div className="col-md-8">
                                 <div className="card-body">

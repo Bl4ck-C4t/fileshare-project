@@ -8,7 +8,8 @@ import {
   Switch,
   Route,
   Link,
-  withRouter
+  withRouter,
+  useParams
 } from "react-router-dom";
 
 function MainPage(props){
