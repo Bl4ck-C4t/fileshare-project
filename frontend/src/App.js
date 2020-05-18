@@ -62,7 +62,7 @@ class App extends Component {
         </Route>
         <Route path="/register" component={withRouter(RegistrationForm)} />
 
-        <Route path="/files" component={withRouter(FilePage)} />
+        <Route path="/files" component={FilePage} />
 
         <Route path="/activate">
             <ActivationPage />

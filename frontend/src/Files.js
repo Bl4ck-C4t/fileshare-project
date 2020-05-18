@@ -5,7 +5,10 @@ import {
   Redirect,
   useHistory,
   Link,
-  useLocation
+  useLocation,
+  Switch,
+  Route,
+  withRouter
 } from "react-router-dom";
 
 async function getFiles(path: string, token: CancelToken){
@@ -36,6 +39,8 @@ class FileComponent extends Component {
         if (path[0] !== "/"){
             path = "/" + path;
         }
+        console.log(path);
+        console.log(this.props.location.pathname)
         getFiles(path, this.source.token)
         .then(res => this.setState({files: res}))
         .catch(thrown => {
@@ -65,18 +70,14 @@ class FileComponent extends Component {
     }
 
     accessFile(fname: string){
-        console.log(fname);
-        console.log(this.props)
-        //this.props.history.push(this.props.location.pathname + "/" + fname)
-        let path = this.props.location.pathname;
-        this.forceUpdate();
-//        path = path.replace("/files", "")
+        let {history, location} = this.props;
+        history.push(location.pathname+"/"+fname);
     }
 
     render() {
 
         return (
-        
+
         <div>
             <h1> Hello {this.state.active_user} </h1>
 
@@ -84,7 +85,6 @@ class FileComponent extends Component {
 
             {this.state.files.map((fname, i) => {
                 return (
-                    <Link key={i} to={this.props.location.pathname+"/"+fname}>
                     <div key={i} className="card border-dark mb-3">
 
                          <div className="row no-gutters" onClick={() => this.accessFile(fname)}>
@@ -98,7 +98,7 @@ class FileComponent extends Component {
                             </div>
                          </div>
                     </div>
-                    </Link>
+
                     );
             })}
 
@@ -108,4 +108,4 @@ class FileComponent extends Component {
     }
 }
 
-export default FileComponent;
+export default withRouter(FileComponent);
