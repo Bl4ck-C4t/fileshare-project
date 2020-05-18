@@ -24,7 +24,7 @@ class FileComponent extends Component {
         super(props);
         this.state = {
             active_user: null,
-            files: []
+            file: {}
         };
         const CancelToken = axios.CancelToken;
         this.source = CancelToken.source();
@@ -42,7 +42,7 @@ class FileComponent extends Component {
         console.log(path);
         console.log(this.props.location.pathname)
         getFiles(path, this.source.token)
-        .then(res => this.setState({files: res}))
+        .then(res => this.setState({file: res}))
         .catch(thrown => {
               if (axios.isCancel(thrown)) {
                 console.log('Request canceled', thrown.message);
@@ -75,15 +75,20 @@ class FileComponent extends Component {
     }
 
     render() {
-
-        return (
+        if (this.state.file == {}){
+            return;
+        }
+        return this.state.file.isDirectory ?
+         (
 
         <div>
             <h1> Hello {this.state.active_user} </h1>
 
                 <div className="card-columns container-fluid" style={{"maxWidth": "82%"}}>
 
-            {this.state.files.map((fname, i) => {
+            {this.state.file.files.map((fname, i) => {
+
+
                 return (
                     <div key={i} className="card border-dark mb-3">
 
@@ -104,8 +109,23 @@ class FileComponent extends Component {
 
            </div>
         </div>
-        );
+        ) : <FileContent file={this.state.file} />
     }
+}
+
+function FileContent(props){
+    return (
+    <div>
+            <h2>Content of file {props.file.fileName}</h2>
+            <hr />
+        <div class="breadcrumb" style={{"width": "73%", "margin": "14%", "margin-top": "4%"}}>
+          <div class="card-body">
+                <p style={{"font-size": "19px"}}> {props.file.fileContent} </p>
+          </div>
+        </div>
+
+    </div>
+    );
 }
 
 export default withRouter(FileComponent);

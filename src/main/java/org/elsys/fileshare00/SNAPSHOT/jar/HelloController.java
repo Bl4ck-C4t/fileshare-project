@@ -5,11 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaFileManager;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -90,7 +87,7 @@ public class HelloController {
     }
 
     @GetMapping("/api/getFiles")
-    public List<String> getFiles(@RequestParam String path, Principal user) throws IOException {
+    public JsonFile getFiles(@RequestParam String path, Principal user) throws IOException {
         if (user == null){
             return null;
         }
@@ -99,12 +96,13 @@ public class HelloController {
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
         File file = new File(path);
         if (file.isDirectory()){
-            return Arrays.asList(Objects.requireNonNull(file.list()));
+            return new JsonFile(true, Arrays.asList(Objects.requireNonNull(file.list())), null,
+                    file.getName());
         }
         else{
-            ArrayList<String> content = new ArrayList<>();
-            content.add(Files.readString(Paths.get(path), StandardCharsets.US_ASCII));
-            return content;
+
+            String content = Files.readString(Paths.get(path), StandardCharsets.US_ASCII);
+            return new JsonFile(false, null, content, file.getName());
 
         }
     }
