@@ -12,7 +12,6 @@ async function getFiles(path: string, token: CancelToken){
     let response = await axios.get("/api/getFiles?path=" + path, {cancelToken: token}).then(res => res.data);
 //    console.log("sd");
     //console.log(await response);
-
     return response;
 
 }
@@ -30,8 +29,14 @@ class FileComponent extends Component {
     }
 
     componentDidMount(){
+        let path = this.props.location.pathname;
+        path = path.split("/").splice(2).join("/");
+        path =  path ? path : "/";
 
-        getFiles("/", this.source.token)
+        if (path[0] !== "/"){
+            path = "/" + path;
+        }
+        getFiles(path, this.source.token)
         .then(res => this.setState({files: res}))
         .catch(thrown => {
               if (axios.isCancel(thrown)) {
@@ -61,16 +66,17 @@ class FileComponent extends Component {
 
     accessFile(fname: string){
         console.log(fname);
-
-        this.props.history.push(this.props.location.pathname + "/" + fname)
+        console.log(this.props)
+        //this.props.history.push(this.props.location.pathname + "/" + fname)
         let path = this.props.location.pathname;
+        this.forceUpdate();
 //        path = path.replace("/files", "")
-        console.log(path);
     }
 
     render() {
 
         return (
+        
         <div>
             <h1> Hello {this.state.active_user} </h1>
 
@@ -78,7 +84,7 @@ class FileComponent extends Component {
 
             {this.state.files.map((fname, i) => {
                 return (
-
+                    <Link key={i} to={this.props.location.pathname+"/"+fname}>
                     <div key={i} className="card border-dark mb-3">
 
                          <div className="row no-gutters" onClick={() => this.accessFile(fname)}>
@@ -92,7 +98,7 @@ class FileComponent extends Component {
                             </div>
                          </div>
                     </div>
-
+                    </Link>
                     );
             })}
 
