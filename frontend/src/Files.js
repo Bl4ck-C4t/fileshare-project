@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './css/Files.css';
 import axios from 'axios';
+import DragAndDrop from './DragAndDrop.js';
 import {
   Redirect,
   useHistory,
@@ -74,6 +75,10 @@ class FileComponent extends Component {
         history.push(location.pathname+"/"+fname);
     }
 
+    handleDrop(files){
+        console.log(files);
+    }
+
     render() {
         if (this.state.file == {}){
             return;
@@ -102,12 +107,20 @@ class FileComponent extends Component {
                                 </div>
                             </div>
                          </div>
+
+
                     </div>
 
                     );
             })}
 
            </div>
+           <DragAndDrop handleDrop={this.handleDrop}>
+                                       <div style={{height: 300, width: 250, "backgroundColor": "gray",
+                                       "marginLeft": "47rem", padding: 68, "fontSize": 27}}>
+
+                                       Upload files here </div>
+                                   </DragAndDrop>
         </div>
         ) : <FileContent file={this.state.file} />
     }
@@ -118,9 +131,9 @@ function FileContent(props){
     <div>
             <h2>Content of file {props.file.fileName}</h2>
             <hr />
-        <div class="breadcrumb" style={{"width": "73%", "margin": "14%", "margin-top": "4%"}}>
-          <div class="card-body">
-                <p style={{"font-size": "19px"}}> {props.file.fileContent} </p>
+        <div className="breadcrumb" style={{"width": "73%", "margin": "14%", "marginTop": "4%"}}>
+          <div className="card-body">
+                <p style={{"fontSize": "19px"}}> {props.file.fileContent} </p>
           </div>
         </div>
 

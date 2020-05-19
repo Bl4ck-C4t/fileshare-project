@@ -2,8 +2,12 @@ package org.elsys.fileshare00.SNAPSHOT.jar;
 
 import org.elsys.fileshare00.SNAPSHOT.jar.Users.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
@@ -105,6 +109,12 @@ public class HelloController {
             return new JsonFile(false, null, content, file.getName());
 
         }
+    }
+
+    @PostMapping("/api/uploadFile")
+    public ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file) {
+
+        return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/api/getFilesWithLink")
