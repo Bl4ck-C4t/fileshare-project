@@ -41,7 +41,7 @@ class FileComponent extends Component {
         if (path[0] !== "/"){
             path = "/" + path;
         }
-        console.log(path);
+//        console.log(path);
         getFiles(path, this.source.token)
         .then(res => this.setState({file: res}))
         .catch(thrown => {
@@ -144,7 +144,12 @@ class FileComponent extends Component {
 
            </div>
             <DragAndDrop handleDrop={this.handleDrop}>
-               <div> Hello </div>
+               <div style= {{
+
+               }
+               }>
+                Drop files to upload here
+              </div>
             </DragAndDrop>
         </div>
         ) : <FileContent file={this.state.file} />
