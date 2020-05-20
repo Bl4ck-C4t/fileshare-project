@@ -34,7 +34,7 @@ class FileComponent extends Component {
         if (path[0] !== "/"){
             path = "/" + path;
         }
-//        console.log(path);
+
         getFiles(path, this.source.token)
         .then(res => this.setState({files: res.files, currentFile: res.file}))
         .catch(thrown => {
@@ -73,9 +73,12 @@ class FileComponent extends Component {
         this.source.cancel('Promises canceled');
     }
 
-    accessFolder(fname: string) {
-        let {history, location} = this.props;
-        history.push(location.pathname+"/"+fname);
+    accessFile(e, fname: string) {
+        if(e.target.id !== "delete"){
+            let {history, location} = this.props;
+            history.push(location.pathname+"/"+fname);
+        }
+
     }
 
     extractPath(){
@@ -88,13 +91,13 @@ class FileComponent extends Component {
     handleDrop(files){
         const file = files[0];
 
-        let path = this.extractPath(path);
+        let path = this.extractPath();
         let formData = new FormData();
         formData.append("file", file);
         formData.append("path", path)
         axios.post("/api/uploadFile", formData, {})
         .then(res => {
-            if(res.status != 202){
+            if(res.status !== 201){
                 console.log("Uploading file failed");
                 console.log(res);
             }
@@ -107,7 +110,11 @@ class FileComponent extends Component {
     }
 
     deleteFile(fname){
-        console.log(fname);
+        console.log('Deleting file: ', fname);
+        let path = this.extractPath() + "/" + fname;
+        console.log(path)
+        axios.delete("/api/deleteFile?path=" + path, {cancelToken: this.source.token})
+        this.updateFiles();
     }
 
     render() {
@@ -127,16 +134,9 @@ class FileComponent extends Component {
 
 
                 return (
-                    <div key={i} className="card border-dark mb-3">
+                    <div key={i} className="card border-dark mb-3" onClick={(e) => this.accessFile(e, file.fileName)}>
 
-                         <div className="row no-gutters" onClick={() => {
-                            if(file.isDirectory){
-                                this.accessFolder(file.fileName)
-                            }
-                            else{
-                                this.accessFolder(file.fileName);
-                            }
-                         }}>
+                         <div className="row no-gutters" >
                             <div className="col-md-4">
                               <img src={
                                 file.isDirectory ? require("./images/folder.png")
@@ -148,10 +148,11 @@ class FileComponent extends Component {
                                     <h3 className="card-text">{file.fileName}</h3>
                                 </div>
                             </div>
-                            <div className="col-md-8">
+
+                            <div className="col-md-4">
                                 <div className="card-body">
                                     <h3 className="card-text">
-                                        <a href="" onClick={() => this.deleteFile(file.fileName)}>
+                                        <a id="delete" href="#" onClick={() => this.deleteFile(file.fileName)}>
                                             Delete
                                         </a>
                                     </h3>

@@ -125,7 +125,7 @@ public class HelloController {
                                            @RequestParam("path") String path, Principal user) throws IOException {
         path = String.format("./UsersFiles/%s/%s/%s", user.getName(), path, file.getOriginalFilename());
         file.transferTo(Paths.get(path));
-        return new ResponseEntity(HttpStatus.ACCEPTED);
+        return new ResponseEntity(HttpStatus.CREATED);
     }
 
     @GetMapping("/api/getFilesWithLink")
@@ -136,6 +136,18 @@ public class HelloController {
         // get files and directories at a path
 
         return files;
+    }
+
+    @DeleteMapping("/api/deleteFile")
+    public ResponseEntity deleteFile(@RequestParam("path") String path, Principal user){
+        path = path.replace("../", "");
+        path = path.replace("..", "");
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        File fl = new File(path);
+        if(!fl.delete()){
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("/api/putFile")
