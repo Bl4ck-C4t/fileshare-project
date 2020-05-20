@@ -19,7 +19,7 @@ class FileComponent extends Component {
         super(props);
         this.state = {
             active_user: null,
-            files: [],
+            files: null,
             currentFile: null
         };
         const CancelToken = axios.CancelToken;
@@ -36,7 +36,7 @@ class FileComponent extends Component {
         }
 //        console.log(path);
         getFiles(path, this.source.token)
-        .then(res => this.setState({files: res.files}))
+        .then(res => this.setState({files: res.files, currentFile: res.file}))
         .catch(thrown => {
               if (axios.isCancel(thrown)) {
                 console.log('Request canceled', thrown.message);
@@ -73,24 +73,9 @@ class FileComponent extends Component {
         this.source.cancel('Promises canceled');
     }
 
-    accessFolder(fname: string){
-
+    accessFolder(fname: string) {
         let {history, location} = this.props;
         history.push(location.pathname+"/"+fname);
-    }
-
-    accessFile(fname: string){
-        let {history, location} = this.props;
-//        console.log("Trying to access file");
-        this.loadFile(this.extractPath()+"/"+fname)
-//        history.push(location.pathname+"/"+fname);
-
-    }
-
-    loadFile(path){
-        axios.get("/api/serveFile?path=" + path, {cancelToken: this.source.token})
-        .then(res => res.data)
-        .then(data => this.setState({currentFile: data}));
     }
 
     extractPath(){
@@ -126,9 +111,10 @@ class FileComponent extends Component {
     }
 
     render() {
-        if (this.state.files == []){
-            return;
+        if (this.state.files == null && this.state.currentFile == null){
+            return null;
         }
+
         return this.state.currentFile == null ?
          (
 
@@ -148,7 +134,7 @@ class FileComponent extends Component {
                                 this.accessFolder(file.fileName)
                             }
                             else{
-                                this.accessFile(file.fileName);
+                                this.accessFolder(file.fileName);
                             }
                          }}>
                             <div className="col-md-4">

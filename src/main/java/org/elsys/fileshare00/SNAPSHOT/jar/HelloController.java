@@ -1,7 +1,7 @@
 package org.elsys.fileshare00.SNAPSHOT.jar;
 
-import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.JsonFile;
-import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.JsonFiles;
+import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.FileInfo;
+import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.FileJson;
 import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.ServedFile;
 import org.elsys.fileshare00.SNAPSHOT.jar.Users.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +94,7 @@ public class HelloController {
     }
 
     @GetMapping("/api/getFiles")
-    public JsonFiles getFiles(@RequestParam String path, Principal user) throws IOException {
+    public FileJson getFiles(@RequestParam String path, Principal user) {
         if (user == null){
             return null;
         }
@@ -103,31 +103,20 @@ public class HelloController {
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
         File file = new File(path);
         if (file.isDirectory()){
-            List<JsonFile> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
-                    .map(fl -> new JsonFile(fl.isDirectory(),  fl.getName())).collect(Collectors.toList());
+            List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
+                    .map(fl -> new FileInfo(fl.isDirectory(),  fl.getName())).collect(Collectors.toList());
 
-            return new JsonFiles(fileObjects);
+            return new FileJson(null, fileObjects);
         }
         else{
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-    }
+            try {
+                String content = Files.readString(Paths.get(path), StandardCharsets.US_ASCII);
+                return new FileJson(new ServedFile(file.getName(), content), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-    @GetMapping("/api/serveFile")
-    public ServedFile getFile(@RequestParam String path, Principal user) {
-        if (user == null){
-            return null;
-        }
-        path = path.replace("../", "");
-        path = path.replace("..", "");
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
-        File file = new File(path);
-        try {
-            String content = Files.readString(Paths.get(path), StandardCharsets.US_ASCII);
-            return new ServedFile(file.getName(), content);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
