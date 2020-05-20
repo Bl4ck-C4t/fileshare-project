@@ -3,12 +3,6 @@ import './css/Files.css';
 import axios from 'axios';
 import DragAndDrop from './DragAndDrop.js';
 import {
-  Redirect,
-  useHistory,
-  Link,
-  useLocation,
-  Switch,
-  Route,
   withRouter
 } from "react-router-dom";
 
@@ -25,7 +19,8 @@ class FileComponent extends Component {
         super(props);
         this.state = {
             active_user: null,
-            file: {}
+            files: [],
+            currentFile: null
         };
         const CancelToken = axios.CancelToken;
         this.source = CancelToken.source();
@@ -34,16 +29,14 @@ class FileComponent extends Component {
     }
 
     updateFiles(){
-        let path = this.props.location.pathname;
-        path = path.split("/").splice(2).join("/");
-        path =  path ? path : "/";
-
+        let path = this.extractPath();
+        this.setState({currentFile: null});
         if (path[0] !== "/"){
             path = "/" + path;
         }
 //        console.log(path);
         getFiles(path, this.source.token)
-        .then(res => this.setState({file: res}))
+        .then(res => this.setState({files: res.files}))
         .catch(thrown => {
               if (axios.isCancel(thrown)) {
                 console.log('Request canceled', thrown.message);
@@ -80,16 +73,37 @@ class FileComponent extends Component {
         this.source.cancel('Promises canceled');
     }
 
-    accessFile(fname: string){
+    accessFolder(fname: string){
+
         let {history, location} = this.props;
         history.push(location.pathname+"/"+fname);
     }
 
-    handleDrop(files){
-        const file = files[0];
+    accessFile(fname: string){
+        let {history, location} = this.props;
+//        console.log("Trying to access file");
+        this.loadFile(this.extractPath()+"/"+fname)
+//        history.push(location.pathname+"/"+fname);
+
+    }
+
+    loadFile(path){
+        axios.get("/api/serveFile?path=" + path, {cancelToken: this.source.token})
+        .then(res => res.data)
+        .then(data => this.setState({currentFile: data}));
+    }
+
+    extractPath(){
         let path = this.props.location.pathname;
         path = path.split("/").splice(2).join("/");
         path =  path ? path : "/";
+        return path;
+    }
+
+    handleDrop(files){
+        const file = files[0];
+
+        let path = this.extractPath(path);
         let formData = new FormData();
         formData.append("file", file);
         formData.append("path", path)
@@ -107,11 +121,15 @@ class FileComponent extends Component {
 
     }
 
+    deleteFile(fname){
+        console.log(fname);
+    }
+
     render() {
-        if (this.state.file == {}){
+        if (this.state.files == []){
             return;
         }
-        return this.state.file.isDirectory ?
+        return this.state.currentFile == null ?
          (
 
         <div>
@@ -119,19 +137,38 @@ class FileComponent extends Component {
 
                 <div className="card-columns container-fluid" style={{"maxWidth": "82%"}}>
 
-            {this.state.file.files.map((fname, i) => {
+            {this.state.files.map((file, i) => {
 
 
                 return (
                     <div key={i} className="card border-dark mb-3">
 
-                         <div className="row no-gutters" onClick={() => this.accessFile(fname)}>
+                         <div className="row no-gutters" onClick={() => {
+                            if(file.isDirectory){
+                                this.accessFolder(file.fileName)
+                            }
+                            else{
+                                this.accessFile(file.fileName);
+                            }
+                         }}>
                             <div className="col-md-4">
-                              <img src={require("./images/file.png")} className="card-image" alt="" />
+                              <img src={
+                                file.isDirectory ? require("./images/folder.png")
+                                : require("./images/file.png")
+                              } className="card-image" alt="" />
                             </div>
                             <div className="col-md-8">
                                 <div className="card-body">
-                                    <h3 className="card-text">{fname}</h3>
+                                    <h3 className="card-text">{file.fileName}</h3>
+                                </div>
+                            </div>
+                            <div className="col-md-8">
+                                <div className="card-body">
+                                    <h3 className="card-text">
+                                        <a href="" onClick={() => this.deleteFile(file.fileName)}>
+                                            Delete
+                                        </a>
+                                    </h3>
                                 </div>
                             </div>
                          </div>
@@ -144,15 +181,12 @@ class FileComponent extends Component {
 
            </div>
             <DragAndDrop handleDrop={this.handleDrop}>
-               <div style= {{
-
-               }
-               }>
+               <div>
                 Drop files to upload here
               </div>
             </DragAndDrop>
         </div>
-        ) : <FileContent file={this.state.file} />
+        ) : <FileContent file={this.state.currentFile} />
     }
 }
 
