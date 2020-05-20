@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.*;
@@ -112,8 +113,10 @@ public class HelloController {
     }
 
     @PostMapping("/api/uploadFile")
-    public ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file) {
-
+    public ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file,
+                                           @RequestParam("path") String path, Principal user) throws IOException {
+        path = String.format("./UsersFiles/%s/%s/%s", user.getName(), path, file.getOriginalFilename());
+        file.transferTo(Paths.get(path));
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 

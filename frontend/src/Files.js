@@ -29,10 +29,11 @@ class FileComponent extends Component {
         };
         const CancelToken = axios.CancelToken;
         this.source = CancelToken.source();
+        this.handleDrop = this.handleDrop.bind(this);
 
     }
 
-    componentDidMount(){
+    updateFiles(){
         let path = this.props.location.pathname;
         path = path.split("/").splice(2).join("/");
         path =  path ? path : "/";
@@ -41,7 +42,6 @@ class FileComponent extends Component {
             path = "/" + path;
         }
         console.log(path);
-        console.log(this.props.location.pathname)
         getFiles(path, this.source.token)
         .then(res => this.setState({file: res}))
         .catch(thrown => {
@@ -52,6 +52,10 @@ class FileComponent extends Component {
                 console.log('Error: ', thrown.message);
               }
           });
+    }
+
+    componentDidMount(){
+       this.updateFiles();
 
         axios.get("/api/getUser", {cancelToken: this.source.token})
         .then((response) =>  response.data)
@@ -63,7 +67,13 @@ class FileComponent extends Component {
                else{
                   console.log('Error: ', thrown.message);
                 }
-        });;
+        });
+    }
+
+    componentDidUpdate(prev){
+        if(this.props.location.pathname != prev.location.pathname){
+            this.updateFiles();
+        }
     }
 
     componentWillUnmount() {
@@ -76,7 +86,25 @@ class FileComponent extends Component {
     }
 
     handleDrop(files){
-        console.log(files);
+        const file = files[0];
+        let path = this.props.location.pathname;
+        path = path.split("/").splice(2).join("/");
+        path =  path ? path : "/";
+        let formData = new FormData();
+        formData.append("file", file);
+        formData.append("path", path)
+        axios.post("/api/uploadFile", formData, {})
+        .then(res => {
+            if(res.status != 202){
+                console.log("Uploading file failed");
+                console.log(res);
+            }
+        });
+        this.updateFiles();
+//        console.log(formData);
+
+        console.log(path)
+
     }
 
     render() {
@@ -115,12 +143,9 @@ class FileComponent extends Component {
             })}
 
            </div>
-           <DragAndDrop handleDrop={this.handleDrop}>
-                                       <div style={{height: 300, width: 250, "backgroundColor": "gray",
-                                       "marginLeft": "47rem", padding: 68, "fontSize": 27}}>
-
-                                       Upload files here </div>
-                                   </DragAndDrop>
+            <DragAndDrop handleDrop={this.handleDrop}>
+               <div> Hello </div>
+            </DragAndDrop>
         </div>
         ) : <FileContent file={this.state.file} />
     }
