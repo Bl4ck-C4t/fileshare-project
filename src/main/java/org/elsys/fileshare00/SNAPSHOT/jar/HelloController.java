@@ -1,5 +1,7 @@
 package org.elsys.fileshare00.SNAPSHOT.jar;
 
+import org.elsys.fileshare00.SNAPSHOT.jar.Files.FileLink;
+import org.elsys.fileshare00.SNAPSHOT.jar.Files.FileLinkRepo;
 import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.FileInfo;
 import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.FileJson;
 import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.ServedFile;
@@ -28,6 +30,9 @@ public class HelloController {
 
     @Autowired
     public AuthorityRepo authorityRepo;
+
+    @Autowired
+    public FileLinkRepo fileLinksRepo;
 
     private EmailServiceImpl emailService = new EmailServiceImpl();
 
@@ -94,13 +99,27 @@ public class HelloController {
     }
 
     @GetMapping("/api/getFiles")
-    public FileJson getFiles(@RequestParam String path, Principal user) {
+    public FileJson getFiles(@RequestParam String path, @RequestParam(defaultValue = "") String access_code,
+                             Principal user) {
         if (user == null){
             return null;
         }
-        path = path.replace("../", "");
-        path = path.replace("..", "");
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        if(!access_code.equals("")){
+            int id = Integer.parseInt(access_code);
+            Optional<FileLink> link = fileLinksRepo.findById(id);
+            if(link.isPresent()){
+                path = link.get().path;
+            }
+            else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            path = path.replace("../", "");
+            path = path.replace("..", "");
+            path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        }
+
         File file = new File(path);
         if (file.isDirectory()){
             List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
@@ -150,16 +169,17 @@ public class HelloController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PutMapping("/api/putFile")
-    public void uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path){
-        //upload file to path
-    }
-
     @GetMapping("/api/generateLink")
-    public String generateProtectedLink(@RequestParam("path") String filepath){
-        String randomCode = HelloController.genRandomString(20);
+    public String generateProtectedLink(@RequestParam("path") String path, Principal user){
+        path = path.replace("../", "");
+        path = path.replace("..", "");
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        FileLink filelink = new FileLink();
+        filelink.path = path;
+
+        FileLink savedLink = fileLinksRepo.save(filelink);
         // register code in database
-        return "/api/getFiles?access_code="+randomCode;
+        return "/api/getFiles?access_code="+savedLink.id;
     }
 //    public String getCurrentUserName(Principal principal){
 //        return principal.getName();

@@ -1,4 +1,4 @@
-package org.elsys.fileshare00.SNAPSHOT.jar;
+package org.elsys.fileshare00.SNAPSHOT.jar.Files;
 
 import org.springframework.context.annotation.Primary;
 
@@ -8,16 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class FileEntity {
-
+public class FileLink {
     @Id
     @GeneratedValue
     public int id;
 
     @Column
-    public String name;
+    public String path;
 
-
-@Column
-    public int length;
 }

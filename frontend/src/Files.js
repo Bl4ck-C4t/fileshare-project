@@ -74,7 +74,7 @@ class FileComponent extends Component {
     }
 
     accessFile(e, fname: string) {
-        if(e.target.id !== "delete"){
+        if(e.target.className !== "comp"){
             let {history, location} = this.props;
             history.push(location.pathname+"/"+fname);
         }
@@ -117,6 +117,13 @@ class FileComponent extends Component {
         this.updateFiles();
     }
 
+    getLink(fname: string){
+        let {history, location} = this.props;
+        let path = this.extractPath() + "/" + fname;
+        history.push("/api/generateLink?path="+path)
+
+    }
+
     render() {
         if (this.state.files == null && this.state.currentFile == null){
             return null;
@@ -152,8 +159,18 @@ class FileComponent extends Component {
                             <div className="col-md-4">
                                 <div className="card-body">
                                     <h3 className="card-text">
-                                        <a id="delete" href="#" onClick={() => this.deleteFile(file.fileName)}>
+                                        <a className="comp" href="#" onClick={() => this.deleteFile(file.fileName)}>
                                             Delete
+                                        </a>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card-body">
+                                    <h3 className="card-text">
+                                        <a className="comp" href={"/api/generateLink?path=" +
+                                                this.extractPath() + "/" + file.fileName}>
+                                            Get Link
                                         </a>
                                     </h3>
                                 </div>
