@@ -1,4 +1,4 @@
-package org.elsys.fileshare00.SNAPSHOT.jar;
+package org.elsys.fileshare00.SNAPSHOT.jar.Users;
 
 import lombok.Data;
 

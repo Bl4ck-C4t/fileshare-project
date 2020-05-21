@@ -9,12 +9,16 @@ import org.elsys.fileshare00.SNAPSHOT.jar.Users.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,6 +50,25 @@ public class HelloController {
                 .limit(targetStringLength)
                 .collect(StringBuilder::new, (x,y) -> x.append(characters.charAt(y)), StringBuilder::append)
                 .toString();
+    }
+
+    private FileJson getJsonFileFromPath(String path){
+        File file = new File(path);
+        if (file.isDirectory()){
+            List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
+                    .map(fl -> new FileInfo(fl.isDirectory(),  fl.getName())).collect(Collectors.toList());
+
+            return new FileJson(null, fileObjects);
+        }
+        else{
+            try {
+                String content = Files.readString(Paths.get(path), StandardCharsets.US_ASCII);
+                return new FileJson(new ServedFile(file.getName(), content), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 
     @GetMapping("/api/getUser")
@@ -104,39 +127,30 @@ public class HelloController {
         if (user == null){
             return null;
         }
-        if(!access_code.equals("")){
-            int id = Integer.parseInt(access_code);
-            Optional<FileLink> link = fileLinksRepo.findById(id);
-            if(link.isPresent()){
-                path = link.get().path;
-            }
-            else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-            }
-        }
-        else{
-            path = path.replace("../", "");
-            path = path.replace("..", "");
-            path = String.format("./UsersFiles/%s/%s", user.getName(), path);
-        }
 
-        File file = new File(path);
-        if (file.isDirectory()){
-            List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
-                    .map(fl -> new FileInfo(fl.isDirectory(),  fl.getName())).collect(Collectors.toList());
+        path = path.replace("../", "");
+        path = path.replace("..", "");
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
 
-            return new FileJson(null, fileObjects);
-        }
-        else{
-            try {
-                String content = Files.readString(Paths.get(path), StandardCharsets.US_ASCII);
-                return new FileJson(new ServedFile(file.getName(), content), null);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        return getJsonFileFromPath(path);
+    }
 
+
+
+    @GetMapping("/api/fileLink")
+    public FileJson getFilesWithLink(@RequestParam String access_code){
+        if(access_code.equals("")){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        String path;
+        FileLink link = fileLinksRepo.findByLink(access_code);
+        if(link != null){
+            path = link.path;
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return getJsonFileFromPath(path);
     }
 
     @PostMapping("/api/uploadFile")
@@ -145,16 +159,6 @@ public class HelloController {
         path = String.format("./UsersFiles/%s/%s/%s", user.getName(), path, file.getOriginalFilename());
         file.transferTo(Paths.get(path));
         return new ResponseEntity(HttpStatus.CREATED);
-    }
-
-    @GetMapping("/api/getFilesWithLink")
-    public List<String> getFilesWithLink(@RequestParam String code){
-        // check if code is valid
-        List<String> files = new ArrayList<String>();
-        files.add("file1.txt");
-        // get files and directories at a path
-
-        return files;
     }
 
     @DeleteMapping("/api/deleteFile")
@@ -174,12 +178,18 @@ public class HelloController {
         path = path.replace("../", "");
         path = path.replace("..", "");
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         FileLink filelink = new FileLink();
         filelink.path = path;
 
         FileLink savedLink = fileLinksRepo.save(filelink);
+        savedLink.code = bcrypt.encode(Integer.toString(savedLink.id));
+        savedLink = fileLinksRepo.save(filelink);
         // register code in database
-        return "/api/getFiles?access_code="+savedLink.id;
+        UriComponents build = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
+        return URI.create(
+                String.format("http://%s:%d/getFiles?access_code=%s",
+                        build.getHost(), build.getPort(), savedLink.code)).toString();
     }
 //    public String getCurrentUserName(Principal principal){
 //        return principal.getName();

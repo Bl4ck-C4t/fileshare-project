@@ -1,14 +1,12 @@
 package org.elsys.fileshare00.SNAPSHOT.jar.Users;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue
     public int id;
 
     @Column
