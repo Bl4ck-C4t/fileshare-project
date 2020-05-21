@@ -28,7 +28,9 @@ class FileComponent extends Component {
         if (path[0] !== "/"){
             path = "/" + path;
         }
-        const url = this.access_code ? "/api/fileLink?access_code="+this.access_code : "/api/getFiles?path="+ path;
+        console.log(path)
+        const url = this.access_code ? "/api/fileLink?access_code="+this.access_code +"&path="+path
+        : "/api/getFiles?path="+ path;
 
         axios.get(url, {cancelToken: this.source.token})
         .then(res => res.data)
@@ -80,7 +82,7 @@ class FileComponent extends Component {
     extractPath(){
         let path = this.props.location.pathname;
         const match = matchPath(path, {
-            path: "/files/*"
+            path: "/:filePath/*"
         });
         path =  match ? match.params[0] : "/";
         return path;

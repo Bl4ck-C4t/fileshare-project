@@ -71,6 +71,13 @@ public class HelloController {
         }
     }
 
+    private String validatePath(String path){
+        path = path.replace("../", "");
+        path = path.replace("..", "");
+
+        return path;
+    }
+
     @GetMapping("/api/getUser")
     public String getCurrentUserName(Principal principal) {
         if(principal == null){
@@ -128,8 +135,7 @@ public class HelloController {
             return null;
         }
 
-        path = path.replace("../", "");
-        path = path.replace("..", "");
+        path = validatePath(path);
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
 
         return getJsonFileFromPath(path);
@@ -138,19 +144,20 @@ public class HelloController {
 
 
     @GetMapping("/api/fileLink")
-    public FileJson getFilesWithLink(@RequestParam String access_code){
+    public FileJson getFilesWithLink(@RequestParam String access_code, @RequestParam String path){
+        path = validatePath(path);
         if(access_code.equals("")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        String path;
+        String mainPath;
         FileLink link = fileLinksRepo.findByLink(access_code);
         if(link != null){
-            path = link.path;
+            mainPath = link.path;
         }
         else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return getJsonFileFromPath(path);
+        return getJsonFileFromPath(mainPath + path);
     }
 
     @PostMapping("/api/uploadFile")
@@ -163,8 +170,7 @@ public class HelloController {
 
     @DeleteMapping("/api/deleteFile")
     public ResponseEntity deleteFile(@RequestParam("path") String path, Principal user){
-        path = path.replace("../", "");
-        path = path.replace("..", "");
+        path = validatePath(path);
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
         File fl = new File(path);
         if(!fl.delete()){
