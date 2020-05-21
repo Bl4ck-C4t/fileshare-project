@@ -174,7 +174,7 @@ public class HelloController {
     }
 
     @GetMapping("/api/generateLink")
-    public String generateProtectedLink(@RequestParam("path") String path, Principal user){
+    public String generateProtectedLink(@RequestParam("path") String path, Principal user) throws InterruptedException {
         path = path.replace("../", "");
         path = path.replace("..", "");
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);

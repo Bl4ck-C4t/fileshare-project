@@ -1,6 +1,7 @@
-import React, {Component} from 'react';
+import React, {Component, useState, useEffect} from 'react';
 import logo from './logo.svg';
 import './css/App.css';
+import axios from 'axios';
 import RegistrationForm from './Registration.js';
 import FilePage from './Files.js';
 import ActivationPage from './Activation.js';
@@ -9,7 +10,8 @@ import {
   Route,
   Link,
   withRouter,
-  useParams
+  useParams,
+  useLocation
 } from "react-router-dom";
 
 function MainPage(props){
@@ -64,13 +66,39 @@ class App extends Component {
 
         <Route path="/files" component={FilePage} />
 
+        <Route path="/getFiles" >
+            <FilePage />
+        </Route>
+
         <Route path="/activate">
             <ActivationPage />
+        </Route>
+
+        <Route path="/getLink">
+            <LinkPage />
         </Route>
         </Switch>
 
         );
     }
+}
+
+function LinkPage(props){
+    const path = new URLSearchParams(useLocation().search).get("path");
+    let [state, setState] = useState(null);
+    useEffect(() => {
+        axios.get("/api/generateLink?path="+path)
+        .then(res => setState(res.data));
+
+    }, []);
+    return (
+    <div>
+        <h4> Use this link to access the shared resource :3 -></h4>
+        <p>{state ? state : "loading..."} </p>
+    </div>
+    );
+//    axios.get("/api/generateLink?path="+path)
+    return null;
 }
 
 export default App;

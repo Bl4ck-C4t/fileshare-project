@@ -3,16 +3,10 @@ import './css/Files.css';
 import axios from 'axios';
 import DragAndDrop from './DragAndDrop.js';
 import {
-  withRouter
+  withRouter,
+  matchPath
 } from "react-router-dom";
 
-async function getFiles(path: string, token: CancelToken){
-    let response = await axios.get("/api/getFiles?path=" + path, {cancelToken: token}).then(res => res.data);
-//    console.log("sd");
-    //console.log(await response);
-    return response;
-
-}
 
 class FileComponent extends Component {
     constructor(props) {
@@ -22,10 +16,10 @@ class FileComponent extends Component {
             files: null,
             currentFile: null
         };
+        this.access_code = new URLSearchParams(this.props.location.search).get("access_code");
         const CancelToken = axios.CancelToken;
         this.source = CancelToken.source();
         this.handleDrop = this.handleDrop.bind(this);
-
     }
 
     updateFiles(){
@@ -34,8 +28,10 @@ class FileComponent extends Component {
         if (path[0] !== "/"){
             path = "/" + path;
         }
+        const url = this.access_code ? "/api/fileLink?access_code="+this.access_code : "/api/getFiles?path="+ path;
 
-        getFiles(path, this.source.token)
+        axios.get(url, {cancelToken: this.source.token})
+        .then(res => res.data)
         .then(res => this.setState({files: res.files, currentFile: res.file}))
         .catch(thrown => {
               if (axios.isCancel(thrown)) {
@@ -83,8 +79,10 @@ class FileComponent extends Component {
 
     extractPath(){
         let path = this.props.location.pathname;
-        path = path.split("/").splice(2).join("/");
-        path =  path ? path : "/";
+        const match = matchPath(path, {
+            path: "/files/*"
+        });
+        path =  match ? match.params[0] : "/";
         return path;
     }
 
@@ -123,8 +121,8 @@ class FileComponent extends Component {
     getLink(fname: string){
         let {history, location} = this.props;
         let path = this.extractPath() + "/" + fname;
-        history.push("/api/generateLink?path="+path)
-
+        history.push("/getLink?path="+path)
+        //history.push("/api/generateLink?path="+path)
     }
 
     render() {
@@ -136,7 +134,7 @@ class FileComponent extends Component {
          (
 
         <div>
-            <h1> Hello {this.state.active_user} </h1>
+            <h1> Hello {this.state.active_user ? this.state.active_user : "guest"} </h1>
 
                 <div className="card-columns container-fluid" style={{"maxWidth": "82%"}}>
 
@@ -171,8 +169,7 @@ class FileComponent extends Component {
                             <div className="col-md-4">
                                 <div className="card-body">
                                     <h3 className="card-text">
-                                        <a className="comp" href={"/api/generateLink?path=" +
-                                                this.extractPath() + "/" + file.fileName}>
+                                        <a className="comp" href="#" onClick={() => this.getLink(file.fileName)}>
                                             Get Link
                                         </a>
                                     </h3>
