@@ -56,7 +56,10 @@ public class HelloController {
         File file = new File(path);
         if (file.isDirectory()){
             List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
-                    .map(fl -> new FileInfo(fl.isDirectory(),  fl.getName())).collect(Collectors.toList());
+                    .map(fl -> new FileInfo(
+                            fl.isDirectory(), fl.getName(),
+                            fileLinksRepo.pathExists(file.getPath() + "/" + fl.getName())))
+                    .collect(Collectors.toList());
 
             return new FileJson(null, fileObjects);
         }
@@ -92,28 +95,33 @@ public class HelloController {
         return foundUser != null;
     }
 
+
+
     @PostMapping("/api/register")
     @ResponseBody
     public String ProcessRegister(FormData body){
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         User unregistered_user = new User();
         unregistered_user.email = body.email;
         unregistered_user.username = body.username;
         unregistered_user.password = body.password;
         unregistered_user.enabled = true;
-        unregistered_user.activationCode = genRandomString(15);
         Authority auth = new Authority();
         auth.username = unregistered_user.username;
         auth.authority = "USER";
+        User user = usersRepo.save(unregistered_user);
+        user.activationCode = bcrypt.encode(Integer.toString(user.id));
+        usersRepo.save(user);
+        authorityRepo.save(auth);
 
-        final String link = "http://localhost:8080/activate?code=" + unregistered_user.activationCode;
+        final String link = "http://localhost:8080/activate?code=" + user.activationCode;
         String mes = "Click this link to activate your account: " + link;
         emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
         boolean Wascreated = new File("./UsersFiles/" + unregistered_user.username).mkdir();
         if(!Wascreated){
             System.out.println("Couldn't create user dir for " + unregistered_user.username);
         }
-        // usersRepo.save(unregistered_user);
-        // authorityRepo.save(auth);
+
         return "It's good";
     }
 
@@ -181,8 +189,7 @@ public class HelloController {
 
     @GetMapping("/api/generateLink")
     public String generateProtectedLink(@RequestParam("path") String path, Principal user) throws InterruptedException {
-        path = path.replace("../", "");
-        path = path.replace("..", "");
+        path = validatePath(path);
         path = String.format("./UsersFiles/%s/%s", user.getName(), path);
         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         FileLink filelink = new FileLink();
@@ -196,6 +203,17 @@ public class HelloController {
         return URI.create(
                 String.format("http://%s:%d/getFiles?access_code=%s",
                         build.getHost(), build.getPort(), savedLink.code)).toString();
+    }
+    @DeleteMapping("/api/deleteLink")
+    public ResponseEntity deleteLink(String path, Principal user){
+        path = validatePath(path);
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        FileLink link = fileLinksRepo.findByPath(path);
+        if (link == null){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        fileLinksRepo.delete(link);
+        return new ResponseEntity(HttpStatus.OK);
     }
 //    public String getCurrentUserName(Principal principal){
 //        return principal.getName();

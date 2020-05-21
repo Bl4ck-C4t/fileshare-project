@@ -26,9 +26,8 @@ class FileComponent extends Component {
         let path = this.extractPath();
         this.setState({currentFile: null});
         if (path[0] !== "/"){
-            path = "/" + path;
+            path =  path;
         }
-        console.log(path)
         const url = this.access_code ? "/api/fileLink?access_code="+this.access_code +"&path="+path
         : "/api/getFiles?path="+ path;
 
@@ -84,7 +83,7 @@ class FileComponent extends Component {
         const match = matchPath(path, {
             path: "/:filePath/*"
         });
-        path =  match ? match.params[0] : "/";
+        path =  match ? match.params[0] : "";
         return path;
     }
 
@@ -105,26 +104,35 @@ class FileComponent extends Component {
                 this.updateFiles();
             }
         });
-
-//        console.log(formData);
-
-        console.log(path)
-
     }
 
     deleteFile(fname){
         console.log('Deleting file: ', fname);
         let path = this.extractPath() + "/" + fname;
-        console.log(path)
         axios.delete("/api/deleteFile?path=" + path, {cancelToken: this.source.token})
-        this.updateFiles();
+        .then(res => res.status == 200 ? this.updateFiles() : console.log(res));
+
     }
 
     getLink(fname: string){
         let {history, location} = this.props;
+
         let path = this.extractPath() + "/" + fname;
+        if (path[0] == "/"){
+            path = path.slice(1);
+        }
+//        console.log(path)
         history.push("/getLink?path="+path)
-        //history.push("/api/generateLink?path="+path)
+    }
+
+    deleteLink(fname: string){
+        let path = this.extractPath() + "/" + fname;
+        if (path[0] == "/"){
+            path = path.slice(1);
+        }
+
+        axios.delete("/api/deleteLink?path="+path, {cancelToken: this.source.token})
+        .then(res => res.status === 200 ? this.updateFiles() : console.log(res))
     }
 
     render() {
@@ -171,9 +179,16 @@ class FileComponent extends Component {
                             <div className="col-md-4">
                                 <div className="card-body">
                                     <h3 className="card-text">
-                                        <a className="comp" href="#" onClick={() => this.getLink(file.fileName)}>
-                                            Get Link
-                                        </a>
+                                    {!file.hasLink ?
+                                    <a className="comp" href="#" onClick={() => this.getLink(file.fileName)}>
+                                        Get Link
+                                    </a> :
+                                    <a className="comp" href="#" onClick={() => this.deleteLink(file.fileName)}>
+                                        Delete Link
+                                    </a>
+
+                                    }
+
                                     </h3>
                                 </div>
                             </div>
