@@ -101,8 +101,11 @@ class FileComponent extends Component {
                 console.log("Uploading file failed");
                 console.log(res);
             }
+            else{
+                this.updateFiles();
+            }
         });
-        this.updateFiles();
+
 //        console.log(formData);
 
         console.log(path)
