@@ -169,7 +169,6 @@ class FileComponent extends Component {
                                 <div className="card-body">
                                     <h3 className="card-text">
                                     <Renameable path={this.extractPath()} file={file} />
-                                    {file.fileName}
                                     </h3>
                                 </div>
                             </div>
