@@ -9,7 +9,7 @@ public class User {
     @GeneratedValue
     public int id;
 
-    @Column
+    @Column(unique = true)
     public String username;
 
     @Column
@@ -21,7 +21,7 @@ public class User {
     @Column
     public boolean enabled;
 
-    @Column(name = "activation_code")
+    @Column(name = "activation_code", length = 60, unique = true)
     public String activationCode;
 
     public void activate() {

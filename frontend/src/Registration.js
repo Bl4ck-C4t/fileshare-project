@@ -89,14 +89,14 @@ class RegistrationForm extends Component {
         ev.preventDefault();
         let temp_state = {};
         for ( var key in this.state.formData ) {
-              temp_state[key] =  this.state[key];
+              temp_state[key] =  this.state.formData[key];
         }
         delete temp_state.repeat_password;
 
 
-//        postData("/api/register", temp_state).
-//        then(res => res.json())
-//        .then(result => console.log(result));
+        postData("/api/register", temp_state).
+        then(res => res.json())
+        .then(result => console.log(result));
         let {history} = this.props;
 
 

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './css/Files.css';
 import axios from 'axios';
 import DragAndDrop from './DragAndDrop.js';
+import Renameable from './Renameable.js'
 import {
   withRouter,
   matchPath
@@ -87,6 +88,15 @@ class FileComponent extends Component {
         return path;
     }
 
+    getFilePath(fname: string){
+        let path = this.extractPath() + "/" + fname;
+        if (path[0] == "/"){
+            path = path.slice(1);
+        }
+
+        return path;
+    }
+
     handleDrop(files){
         const file = files[0];
 
@@ -117,19 +127,13 @@ class FileComponent extends Component {
     getLink(fname: string){
         let {history, location} = this.props;
 
-        let path = this.extractPath() + "/" + fname;
-        if (path[0] == "/"){
-            path = path.slice(1);
-        }
+        let path = this.getFilePath(fname)
 //        console.log(path)
         history.push("/getLink?path="+path)
     }
 
     deleteLink(fname: string){
-        let path = this.extractPath() + "/" + fname;
-        if (path[0] == "/"){
-            path = path.slice(1);
-        }
+        let path = this.getFilePath(fname)
 
         axios.delete("/api/deleteLink?path="+path, {cancelToken: this.source.token})
         .then(res => res.status === 200 ? this.updateFiles() : console.log(res))
@@ -163,7 +167,10 @@ class FileComponent extends Component {
                             </div>
                             <div className="col-md-8">
                                 <div className="card-body">
-                                    <h3 className="card-text">{file.fileName}</h3>
+                                    <h3 className="card-text">
+                                    <Renameable path={this.extractPath()} file={file} />
+                                    {file.fileName}
+                                    </h3>
                                 </div>
                             </div>
 

@@ -44,12 +44,12 @@ class App extends Component {
     }
 
     componentDidMount(){
-        fetch("/api/getUser").then((response) => {
+        axios.get("/api/getUser").then((response) => {
             if (response.redirected){
                 return null
             }
             else{
-                return response.text();
+                return response.data;
             }
         })
         .then(text => this.setState({ active_user: text}));

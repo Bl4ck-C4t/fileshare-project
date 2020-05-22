@@ -149,6 +149,18 @@ public class HelloController {
         return getJsonFileFromPath(path);
     }
 
+    @PostMapping("/api/renameFile")
+    public void renameFile(@RequestParam String path, @RequestParam String newName,
+                           Principal user){
+        path = validatePath(path);
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        File file = new File(path);
+        boolean gotRenamed = file.renameTo(new File(Paths.get(path).getParent() + "/" + newName));
+        if(!gotRenamed){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
     @GetMapping("/api/fileLink")
