@@ -11,7 +11,8 @@ import {
   Link,
   withRouter,
   useParams,
-  useLocation
+  useLocation,
+  Redirect
 } from "react-router-dom";
 
 function MainPage(props){
@@ -64,8 +65,6 @@ class App extends Component {
         </Route>
         <Route path="/register" component={withRouter(RegistrationForm)} />
 
-        <Route path="/files" component={FilePage} />
-
         <Route path="/getFiles" >
             <FilePage />
         </Route>
@@ -74,17 +73,26 @@ class App extends Component {
             <ActivationPage />
         </Route>
 
-        <Route path="/getLink">
+       <PrivateRoute user={this.state.active_user} path="/files" >
+            <FilePage />
+        </PrivateRoute>
+
+
+        <PrivateRoute user={this.state.active_user} path="/getLink">
             <LinkPage />
-        </Route>
+        </PrivateRoute>
 
-        <Route path="/register-success">
-
-        </Route>
         </Switch>
 
         );
     }
+}
+
+function PrivateRoute({user, children, ...rest}) {
+    return (<Route
+            {...rest}
+            render={() => user ?  children: <Redirect to="/" /> }
+            />);
 }
 
 function LinkPage(props){
