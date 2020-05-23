@@ -216,7 +216,8 @@ class FileComponent extends Component {
            </div>
             <DragAndDrop handleDrop={this.handleDrop}>
                <div>
-                <i id="dragzone" className="fa fa-file-upload">Drop files to upload here </i>
+                <i id="dragzone" className="fa fa-file-upload"> </i>
+                Drop files to upload here
               </div>
             </DragAndDrop>
 

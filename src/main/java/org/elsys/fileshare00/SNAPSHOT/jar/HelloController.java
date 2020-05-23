@@ -165,8 +165,14 @@ public class HelloController {
             int newFoldersCount = (int)Arrays.stream(Objects.requireNonNull(currentFolder.listFiles()))
                     .filter(fl -> fl.getName().startsWith("NewFolder")).count();
 
-            newFolder = new File(path + "/NewFolder"+
-                    (newFoldersCount > 0 ? "(" + newFoldersCount + ")" : ""));
+            for(int i=1; i <= newFoldersCount; i++){
+                newFolder = new File(path + "/NewFolder"+
+                        (newFoldersCount > 0 ? "(" + i + ")" : ""));
+                if(!newFolder.exists()){
+                    break;
+                }
+            }
+
         }
 
 

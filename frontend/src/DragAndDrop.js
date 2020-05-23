@@ -69,6 +69,7 @@ render() {
                            marginLeft: "34%",
                            width: "26%",
                            padding: 58,
+                           fontSize:36,
 
         }}
         ref={this.dropRef}
