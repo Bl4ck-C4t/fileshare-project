@@ -21,6 +21,7 @@ class FileComponent extends Component {
         const CancelToken = axios.CancelToken;
         this.source = CancelToken.source();
         this.handleDrop = this.handleDrop.bind(this);
+        this.makeFolder = this.makeFolder.bind(this);
     }
 
     updateFiles(){
@@ -114,6 +115,12 @@ class FileComponent extends Component {
                 this.updateFiles();
             }
         });
+    }
+
+    makeFolder(){
+        axios.put("/api/mkdir?path="+this.extractPath())
+        .then(res => console.log(res))
+        .then(res => this.updateFiles());
     }
 
     deleteFile(fname){
@@ -212,6 +219,8 @@ class FileComponent extends Component {
                 Drop files to upload here
               </div>
             </DragAndDrop>
+
+             <button id="folderbtn" onClick={this.makeFolder}> Make folder </button>
         </div>
         ) : <FileContent file={this.state.currentFile} />
     }

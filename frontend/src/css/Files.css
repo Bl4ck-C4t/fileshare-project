@@ -3,3 +3,8 @@ img {
     padding: 4px 0px 0px 1px;
     margin: 6px 0px 0px 10px;
 }
+
+#folderbtn {
+    margin-left: 15%;
+    scale: 2;
+}

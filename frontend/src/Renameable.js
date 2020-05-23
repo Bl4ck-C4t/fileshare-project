@@ -2,7 +2,6 @@ import React, {Component, useState, useEffect} from 'react';
 import axios from 'axios';
 
 function Renameable(props){
-    console.log(props.file.fileName)
     let [state, setState] = useState({modifiying: false, name:props.file.fileName});
 
     const click = () => {

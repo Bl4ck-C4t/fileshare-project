@@ -81,6 +81,12 @@ public class HelloController {
         return path;
     }
 
+    private String pathToUserPath(String path, Principal user){
+        path = validatePath(path);
+        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        return path;
+    }
+
     @GetMapping("/api/getUser")
     public String getCurrentUserName(Principal principal) {
         if(principal == null){
@@ -143,17 +149,32 @@ public class HelloController {
             return null;
         }
 
-        path = validatePath(path);
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        path = pathToUserPath(path, user);
 
         return getJsonFileFromPath(path);
+    }
+
+    @PutMapping("/api/mkdir")
+    public String createDirectory(@RequestParam String path, Principal user){
+        path = pathToUserPath(path, user);
+        File currentFolder = new File(path);
+        int newFoldersCount = (int)Arrays.stream(Objects.requireNonNull(currentFolder.listFiles()))
+                .filter(fl -> fl.getName().startsWith("NewFolder")).count();
+
+        File file = new File(path + "/NewFolder"+
+                (newFoldersCount > 0 ? "(" + newFoldersCount + ")" : ""));
+        if(!file.mkdir()){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return file.getName();
+
     }
 
     @PostMapping("/api/renameFile")
     public void renameFile(@RequestParam String path, @RequestParam String newName,
                            Principal user){
-        path = validatePath(path);
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        path = pathToUserPath(path, user);
         File file = new File(path);
         boolean gotRenamed = file.renameTo(new File(Paths.get(path).getParent() + "/" + newName));
         if(!gotRenamed){
@@ -190,8 +211,7 @@ public class HelloController {
 
     @DeleteMapping("/api/deleteFile")
     public ResponseEntity deleteFile(@RequestParam("path") String path, Principal user){
-        path = validatePath(path);
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        path = pathToUserPath(path, user);
         File fl = new File(path);
         if(!fl.delete()){
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -201,8 +221,7 @@ public class HelloController {
 
     @GetMapping("/api/generateLink")
     public String generateProtectedLink(@RequestParam("path") String path, Principal user) throws InterruptedException {
-        path = validatePath(path);
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        path = pathToUserPath(path, user);
         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         FileLink filelink = new FileLink();
         filelink.path = path;
@@ -218,8 +237,7 @@ public class HelloController {
     }
     @DeleteMapping("/api/deleteLink")
     public ResponseEntity deleteLink(String path, Principal user){
-        path = validatePath(path);
-        path = String.format("./UsersFiles/%s/%s", user.getName(), path);
+        path = pathToUserPath(path, user);
         FileLink link = fileLinksRepo.findByPath(path);
         if (link == null){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);

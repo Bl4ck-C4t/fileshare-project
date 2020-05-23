@@ -15,7 +15,7 @@ function ActivationPage(props){
         setState(success);
     }
 
-    useEffect(() => {fetchData();});
+    useEffect(() => {fetchData()}, []);
     if(state){
         return <h1> Your account has been activated</h1>;
     }
