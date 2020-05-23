@@ -1,5 +1,6 @@
 package org.elsys.fileshare00.SNAPSHOT.jar;
 
+import org.apache.commons.io.FileUtils;
 import org.elsys.fileshare00.SNAPSHOT.jar.Files.FileLink;
 import org.elsys.fileshare00.SNAPSHOT.jar.Files.FileLinkRepo;
 import org.elsys.fileshare00.SNAPSHOT.jar.JsonResponses.FileInfo;
@@ -166,8 +167,7 @@ public class HelloController {
                     .filter(fl -> fl.getName().startsWith("NewFolder")).count();
 
             for(int i=1; i <= newFoldersCount; i++){
-                newFolder = new File(path + "/NewFolder"+
-                        (newFoldersCount > 0 ? "(" + i + ")" : ""));
+                newFolder = new File(path + "/NewFolder" + ("(" + i + ")"));
                 if(!newFolder.exists()){
                     break;
                 }
@@ -224,12 +224,18 @@ public class HelloController {
     }
 
     @DeleteMapping("/api/deleteFile")
-    public ResponseEntity deleteFile(@RequestParam("path") String path, Principal user){
+    public ResponseEntity deleteFile(@RequestParam("path") String path, Principal user) throws IOException {
         path = pathToUserPath(path, user);
         File fl = new File(path);
-        if(!fl.delete()){
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        if(fl.isDirectory()){
+            FileUtils.deleteDirectory(fl);
         }
+        else{
+            if(!fl.delete()){
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
