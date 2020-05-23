@@ -139,10 +139,13 @@ class RegistrationForm extends Component {
             <input type="password" placeholder="Repeat Password" name="repeat_password" required onChange={this.handleChange}/>
             <hr/>
             <br />
-            <div className="alert alert-danger error-div">{this.state.errorMessages.map((error, i) => {
-                  return <p key={i} style={{color: "red"}}>{error}</p>
+
+            {this.state.errorMessages.map((error, i) => {
+                  return (
+                  <div className="alert alert-danger error-div">
+                  <p key={i} style={{color: "red"}}>{error}</p>
+                  </div>);
               })}
-            </div>
             <button type="submit" className="registerbtn" >Register</button>
         </form>
         </div>
