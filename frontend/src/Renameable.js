@@ -27,12 +27,17 @@ function Renameable(props){
     }, [props]);
 
     return (
-    <div>
+    <div id={state.modifiying ? "" : "file-name-control"}>
+            {state.modifiying ?
+
+            <input type="text" className="comp" onChange={(e) => setState({...state, name:e.target.value})} value={state.name}/> :
+            <p className="fileName"> {state.name} </p>}
+        <button className="comp edit" type="button" onClick={click}>
         {state.modifiying ?
-        <input type="text" className="comp" onChange={(e) => setState({...state, name:e.target.value})} value={state.name}/> :
-        <p> {state.name} </p>}
-        <button className="comp" type="button" onClick={click}>
-        {state.modifiying ? "save" : "rename"} </button>
+        <span className="comp"><i className="fas fa-check-square comp" /> Accept </span> :
+        <span className="comp"><i className="fas fa-edit comp" />Rename</span>}
+
+        </button>
     </div>
     );
 }

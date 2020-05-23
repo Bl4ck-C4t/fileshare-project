@@ -4,6 +4,35 @@ img {
     margin: 6px 0px 0px 10px;
 }
 
+i.file {
+        scale: 5;
+        margin: 42px;
+            margin-left: 42px;
+        margin-left: 58px;
+}
+
+button.comp {
+    margin: -44px;
+}
+
+button.edit {
+    margin-left: 10px;
+    scale: 0.7;
+}
+
+#file-name-control{
+    margin-top: 24px;
+}
+
+.fileName {
+    display: inline;
+}
+
+#dragzone {
+    scale: 1.9;
+    margin-left:74px;
+}
+
 #folderbtn {
     margin-left: 15%;
     scale: 2;

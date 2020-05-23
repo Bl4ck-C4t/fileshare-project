@@ -66,9 +66,9 @@ render() {
       <div
         style={{display: 'inline-block', position: 'relative',
          backgroundColor: "gray",
-                           marginLeft: "43%",
-                           width: "16%",
-                           padding: 51,
+                           marginLeft: "34%",
+                           width: "26%",
+                           padding: 58,
 
         }}
         ref={this.dropRef}

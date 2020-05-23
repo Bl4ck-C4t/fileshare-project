@@ -73,7 +73,7 @@ class FileComponent extends Component {
     }
 
     accessFile(e, fname: string) {
-        if(e.target.className !== "comp"){
+        if(!e.target.classList.contains("comp")){
             let {history, location} = this.props;
             history.push(location.pathname+"/"+fname);
         }
@@ -167,10 +167,10 @@ class FileComponent extends Component {
 
                          <div className="row no-gutters" >
                             <div className="col-md-4">
-                              <img src={
-                                file.isDirectory ? require("./images/folder.png")
-                                : require("./images/file.png")
-                              } className="card-image" alt="" />
+                            {file.isDirectory ?
+                            <i className="fas fa-folder file"></i> :
+                            <i className="fas fa-file-alt file  "></i>}
+
                             </div>
                             <div className="col-md-8">
                                 <div className="card-body">
@@ -216,11 +216,12 @@ class FileComponent extends Component {
            </div>
             <DragAndDrop handleDrop={this.handleDrop}>
                <div>
-                Drop files to upload here
+                <i id="dragzone" className="fa fa-file-upload">Drop files to upload here </i>
               </div>
             </DragAndDrop>
 
-             <button id="folderbtn" onClick={this.makeFolder}> Make folder </button>
+             <button id="folderbtn" onClick={this.makeFolder}>
+             <i className="fas fa-folder-plus" /> Make folder </button>
         </div>
         ) : <FileContent file={this.state.currentFile} />
     }

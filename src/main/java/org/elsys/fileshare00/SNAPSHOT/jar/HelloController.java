@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -36,7 +37,7 @@ public class HelloController {
     public AuthorityRepo authorityRepo;
 
     @Autowired
-    public FileLinkRepo fileLinksRepo;
+    public FileLinkRepo newFolder;
 
     private EmailServiceImpl emailService = new EmailServiceImpl();
 
@@ -58,7 +59,7 @@ public class HelloController {
             List<FileInfo> fileObjects = Arrays.stream(Objects.requireNonNull(file.listFiles()))
                     .map(fl -> new FileInfo(
                             fl.isDirectory(), fl.getName(),
-                            fileLinksRepo.pathExists(file.getPath() + "/" + fl.getName())))
+                            newFolder.pathExists(file.getPath() + "/" + fl.getName())))
                     .collect(Collectors.toList());
 
             return new FileJson(null, fileObjects);
@@ -155,19 +156,26 @@ public class HelloController {
     }
 
     @PutMapping("/api/mkdir")
-    public String createDirectory(@RequestParam String path, Principal user){
+    public String createDirectory(@RequestParam String path, Principal user, HttpServletResponse response){
         path = pathToUserPath(path, user);
         File currentFolder = new File(path);
-        int newFoldersCount = (int)Arrays.stream(Objects.requireNonNull(currentFolder.listFiles()))
-                .filter(fl -> fl.getName().startsWith("NewFolder")).count();
+        File newFolder = new File(path + "/NewFolder");
 
-        File file = new File(path + "/NewFolder"+
-                (newFoldersCount > 0 ? "(" + newFoldersCount + ")" : ""));
-        if(!file.mkdir()){
+        if(newFolder.exists()){
+            int newFoldersCount = (int)Arrays.stream(Objects.requireNonNull(currentFolder.listFiles()))
+                    .filter(fl -> fl.getName().startsWith("NewFolder")).count();
+
+            newFolder = new File(path + "/NewFolder"+
+                    (newFoldersCount > 0 ? "(" + newFoldersCount + ")" : ""));
+        }
+
+
+        if(!newFolder.mkdir()){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return file.getName();
+        response.setStatus(HttpServletResponse.SC_CREATED);
+        return newFolder.getName();
 
     }
 
@@ -191,7 +199,7 @@ public class HelloController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         String mainPath;
-        FileLink link = fileLinksRepo.findByLink(access_code);
+        FileLink link = newFolder.findByLink(access_code);
         if(link != null){
             mainPath = link.path;
         }
@@ -226,9 +234,9 @@ public class HelloController {
         FileLink filelink = new FileLink();
         filelink.path = path;
 
-        FileLink savedLink = fileLinksRepo.save(filelink);
+        FileLink savedLink = newFolder.save(filelink);
         savedLink.code = bcrypt.encode(Integer.toString(savedLink.id));
-        savedLink = fileLinksRepo.save(filelink);
+        savedLink = newFolder.save(filelink);
         // register code in database
         UriComponents build = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
         return URI.create(
@@ -238,11 +246,11 @@ public class HelloController {
     @DeleteMapping("/api/deleteLink")
     public ResponseEntity deleteLink(String path, Principal user){
         path = pathToUserPath(path, user);
-        FileLink link = fileLinksRepo.findByPath(path);
+        FileLink link = newFolder.findByPath(path);
         if (link == null){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        fileLinksRepo.delete(link);
+        newFolder.delete(link);
         return new ResponseEntity(HttpStatus.OK);
     }
 //    public String getCurrentUserName(Principal principal){
