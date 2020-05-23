@@ -112,7 +112,7 @@ public class HelloController {
         unregistered_user.email = body.email;
         unregistered_user.username = body.username;
         unregistered_user.password = body.password;
-        unregistered_user.enabled = true;
+        unregistered_user.enabled = false;
         Authority auth = new Authority();
         auth.username = unregistered_user.username;
         auth.authority = "USER";

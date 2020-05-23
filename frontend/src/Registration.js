@@ -32,7 +32,8 @@ class RegistrationForm extends Component {
                repeat_password: "",
                email: "",
             },
-            errorMessages: []
+            errorMessages: [],
+            registered: false
         };
         this.handleChange = this.handleChange.bind(this);
         this.submitForm = this.submitForm.bind(this);
@@ -97,14 +98,13 @@ class RegistrationForm extends Component {
         postData("/api/register", temp_state).
         then(res => res.json())
         .then(result => console.log(result));
-        let {history} = this.props;
-
 
         if (this.state.errorMessages.length > 0) {
             return false;
         }
         else{
-            history.push("/");
+            this.setState({registered: true});
+//            history.push("/register-success");
             return true;
         }
 
@@ -112,7 +112,14 @@ class RegistrationForm extends Component {
 
     render() {
 
-        return (
+        return this.state.registered ? (
+        <div>
+            <p> Activation email sent to {this.state.formData.email} </p>
+            <Link to="/"> Return to home page </Link>
+        </div>
+        ) :
+
+        (
         <div>
         <h1>Register</h1>
         <form onSubmit={this.submitForm}>
@@ -132,7 +139,7 @@ class RegistrationForm extends Component {
             <input type="password" placeholder="Repeat Password" name="repeat_password" required onChange={this.handleChange}/>
             <hr/>
             <br />
-            <div className="error-div">{this.state.errorMessages.map((error, i) => {
+            <div className="alert alert-danger error-div">{this.state.errorMessages.map((error, i) => {
                   return <p key={i} style={{color: "red"}}>{error}</p>
               })}
             </div>

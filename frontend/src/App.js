@@ -77,6 +77,10 @@ class App extends Component {
         <Route path="/getLink">
             <LinkPage />
         </Route>
+
+        <Route path="/register-success">
+
+        </Route>
         </Switch>
 
         );
