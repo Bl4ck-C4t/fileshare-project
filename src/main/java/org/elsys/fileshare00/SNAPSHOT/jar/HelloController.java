@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,6 +40,9 @@ public class HelloController {
 
     @Autowired
     public FileLinkRepo newFolder;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private EmailServiceImpl emailService = new EmailServiceImpl();
 
@@ -112,7 +116,7 @@ public class HelloController {
         User unregistered_user = new User();
         unregistered_user.email = body.email;
         unregistered_user.username = body.username;
-        unregistered_user.password = body.password;
+        unregistered_user.password = passwordEncoder.encode(body.password);
         unregistered_user.enabled = false;
         Authority auth = new Authority();
         auth.username = unregistered_user.username;
@@ -124,7 +128,7 @@ public class HelloController {
 
         final String link = "http://localhost:8080/activate?code=" + user.activationCode;
         String mes = "Click this link to activate your account: " + link;
-        emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
+        //emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
         boolean Wascreated = new File("./UsersFiles/" + unregistered_user.username).mkdir();
         if(!Wascreated){
             System.out.println("Couldn't create user dir for " + unregistered_user.username);

@@ -12,7 +12,7 @@ public class User {
     @Column(unique = true)
     public String username;
 
-    @Column
+    @Column(length = 60)
     public String password;
 
     @Column

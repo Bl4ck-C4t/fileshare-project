@@ -142,7 +142,7 @@ class RegistrationForm extends Component {
 
             {this.state.errorMessages.map((error, i) => {
                   return (
-                  <div className="alert alert-danger error-div">
+                  <div key={i} className="alert alert-danger error-div">
                   <p key={i} style={{color: "red"}}>{error}</p>
                   </div>);
               })}

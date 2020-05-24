@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Qualifier("UserRepo")
 public interface UsersRepo extends JpaRepository<User, Integer> {
-    @Query(value = "select * from users u where u.username= ?1", nativeQuery = true)
+    @Query("select u from User u where u.username= ?1")
     public User findByUsername(String username);
 
     @Query("select u from User u where u.activationCode = ?1")
