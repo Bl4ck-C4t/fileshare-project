@@ -75,8 +75,7 @@ class App extends Component {
 
        <PrivateRoute user={this.state.active_user} path="/files" >
             <FilePage />
-        </PrivateRoute>
-
+       </PrivateRoute>
 
         <PrivateRoute user={this.state.active_user} path="/getLink">
             <LinkPage />
@@ -88,10 +87,19 @@ class App extends Component {
     }
 }
 
-function PrivateRoute({user, children, ...rest}) {
+function PrivateRoute({children, component, user, ...rest}) {
     return (<Route
             {...rest}
-            render={() => user ?  children: <Redirect to="/" /> }
+            render={() => {
+                switch(user){
+                    case null:
+                        return <h2> Loading... </h2>
+                    case "":
+                        return <Redirect to="/" />
+                    default:
+                        return children;
+                }
+            }}
             />);
 }
 

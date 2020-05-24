@@ -92,7 +92,7 @@ public class HelloController {
     @GetMapping("/api/getUser")
     public String getCurrentUserName(Principal principal) {
         if(principal == null){
-            return null;
+            return "";
         }
         return principal.getName();
     }
