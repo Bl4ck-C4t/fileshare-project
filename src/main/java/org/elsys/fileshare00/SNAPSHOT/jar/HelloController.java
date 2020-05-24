@@ -189,13 +189,13 @@ public class HelloController {
     public void renameFile(@RequestParam String path, @RequestParam String newName,
                            Principal user){
         path = pathToUserPath(path, user);
+        newName = validatePath(newName);
         File file = new File(path);
         boolean gotRenamed = file.renameTo(new File(Paths.get(path).getParent() + "/" + newName));
         if(!gotRenamed){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
     @GetMapping("/api/fileLink")
