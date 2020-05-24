@@ -128,7 +128,7 @@ public class HelloController {
 
         final String link = "http://localhost:8080/activate?code=" + user.activationCode;
         String mes = "Click this link to activate your account: " + link;
-        //emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
+        emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
         boolean Wascreated = new File("./UsersFiles/" + unregistered_user.username).mkdir();
         if(!Wascreated){
             System.out.println("Couldn't create user dir for " + unregistered_user.username);
