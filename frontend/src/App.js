@@ -118,7 +118,6 @@ function LinkPage(props){
     </div>
     );
 //    axios.get("/api/generateLink?path="+path)
-    return null;
 }
 
 export default App;

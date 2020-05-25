@@ -24,7 +24,7 @@ function Renameable(props){
     useEffect(() => {
         setState({...state, name: props.file.fileName});
 
-    }, [props]);
+    }, [props.file.fileName]);
 
     return (
     <div id={state.modifiying ? "" : "file-name-control"}>
