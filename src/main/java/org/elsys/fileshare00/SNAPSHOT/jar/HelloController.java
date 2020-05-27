@@ -125,8 +125,10 @@ public class HelloController {
         user.activationCode = bcrypt.encode(Integer.toString(user.id));
         usersRepo.save(user);
         authorityRepo.save(auth);
-
-        final String link = "http://localhost:8080/activate?code=" + user.activationCode;
+        UriComponents build = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
+        final String link = URI.create(
+                String.format("%s://%s%s/activate?code=%s", build.getScheme(),
+                build.getHost(), build.getPort() > -1 ? ":" + build.getPort() : "", user.activationCode)).toString();
         String mes = "Click this link to activate your account: " + link;
         emailService.sendSimpleMessage(unregistered_user.email, "Activate your Fileserver account", mes);
         boolean Wascreated = new File("./UsersFiles/" + unregistered_user.username).mkdir();
@@ -216,7 +218,7 @@ public class HelloController {
         else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return getJsonFileFromPath(mainPath + path);
+        return getJsonFileFromPath(mainPath + "/" + path);
     }
 
     @PostMapping("/api/uploadFile")
@@ -256,8 +258,9 @@ public class HelloController {
         // register code in database
         UriComponents build = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
         return URI.create(
-                String.format("http://%s:%d/getFiles?access_code=%s",
-                        build.getHost(), build.getPort(), savedLink.code)).toString();
+                String.format("http://%s%s/getFiles?access_code=%s",
+                        build.getHost(), build.getPort() > -1 ? ":" + build.getPort() : "",
+                        savedLink.code)).toString();
     }
     @DeleteMapping("/api/deleteLink")
     public ResponseEntity deleteLink(String path, Principal user){
