@@ -19,7 +19,7 @@ function ActivationPage(props){
     if(state){
         return (<div>
         <h1> Your account has been activated</h1>
-        <Link to="/login"> Go to login page </Link>
+        <a href="/login"> Go to login page </a>
         </div>);
     }
     else if (state == null){
