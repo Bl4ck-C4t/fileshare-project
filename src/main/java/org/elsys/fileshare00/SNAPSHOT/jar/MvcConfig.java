@@ -9,8 +9,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MvcConfig implements WebMvcConfigurer {
 
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/{spring:\\w+}")
-            .setViewName("forward:/");
+        
+        registry.addViewController("/{x:[\\w\\-]+}")
+                .setViewName("forward:/");
+        // Multi-level directory path, need to exclude "api" on the first part of the path
+        registry.addViewController("/{x:^(?!api$).*$}/**/{y:[\\w\\-]+}")
+                .setViewName("forward:/");
         
 
     }
