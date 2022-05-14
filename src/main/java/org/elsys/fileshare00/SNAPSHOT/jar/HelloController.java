@@ -157,6 +157,10 @@ public class HelloController {
             return null;
         }
 
+        File userDir = new File("./UsersFiles/" + user.getName());
+        if (!userDir.exists())
+            if (!userDir.mkdir())
+                System.out.println("Cannot create home dir for user " + user.getName());
         path = pathToUserPath(path, user);
 
         return getJsonFileFromPath(path);

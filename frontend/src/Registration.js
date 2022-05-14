@@ -42,7 +42,7 @@ class RegistrationForm extends Component {
 
 
 
-    async usernameExists(username: string){
+    async usernameExists(username){
         let response = await fetch("/api/userExists?username="+username);
         response = await response.json();
         let val = await response;
