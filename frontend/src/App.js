@@ -20,9 +20,8 @@ function MainPage(props){
     return (
     user ? (
     <div className="App">
-                <a href="/login?logout"> Log out </a> <br/>
+                <a href="/logout"> Log out </a> <br/>
                 <Link to="/files"> Go to Files </Link>
-
      </div>
         )
 

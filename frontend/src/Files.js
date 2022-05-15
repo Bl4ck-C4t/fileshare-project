@@ -223,6 +223,7 @@ class FileComponent extends Component {
 
              <button id="folderbtn" onClick={this.makeFolder}>
              <i className="fas fa-folder-plus" /> Make folder </button>
+            <Link to="/"> Go to Main </Link>
         </div>
         ) : <FileContent file={this.state.currentFile} />
     }
